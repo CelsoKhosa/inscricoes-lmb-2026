@@ -37,7 +37,7 @@
   .taxa{margin-top:8px; font-size:1rem; background:var(--cinza); border-left:4px solid var(--dourado); padding:10px 12px; border-radius:6px;}
   .taxa b{color:var(--vermelho); font-size:1.05rem;}
   .tbl-wrap{overflow-x:auto; border:1px solid var(--borda); border-radius:8px;}
-  table{border-collapse:collapse; width:100%; min-width:1545px; font-size:.85rem;}
+  table{border-collapse:collapse; width:100%; min-width:1700px; font-size:.85rem;}
   thead th{background:var(--preto); color:#fff; padding:8px 6px; font-size:.8rem; text-align:left; white-space:nowrap; position:sticky; top:0;}
   tbody td{border-top:1px solid var(--borda); padding:5px 4px; vertical-align:middle; background:#fff;}
   tbody tr.sec td{background:var(--dourado); color:var(--preto); font-weight:700; font-size:.82rem; padding:6px 8px;}
@@ -47,7 +47,9 @@
   td input[type=file]{border:none; background:transparent; padding:4px 0; font-size:.78rem; width:165px;}
   .col-nome{min-width:190px;} .col-data{width:130px;} .col-bi{min-width:130px;} .col-cam{width:78px;}
   .col-pos{width:120px;} .col-tel{min-width:120px;} .col-fic{width:175px;}
-  .col-tipo{width:172px;} .col-foto{width:200px;}
+  .col-tipo{width:172px;} .col-foto{width:200px;} .col-nac{width:148px;}
+  td select.nac{font-size:.8rem;}
+  td select.nac.estrangeiro{border-color:#0a5ca8; background:#f2f7fd; font-weight:600;}
   .celula-foto{display:flex; align-items:center; gap:6px;}
   .celula-foto .thumb{width:34px; height:44px; border:1px solid var(--borda); border-radius:3px;
         object-fit:cover; background:#fff; display:none; flex:0 0 auto;}
@@ -55,6 +57,21 @@
   .celula-foto input[type=file]{width:150px;}
   td select.tipo-doc{font-size:.8rem;}
   tr.falta td{background:#fff2f2 !important;}
+  tr.erro td{background:#fff2f2 !important;}
+  tr.suspeita td{background:#fffaf0 !important;}
+  td input.mal{border-color:var(--vermelho); background:#fff6f6;}
+  td input.duvida{border-color:#d9a300; background:#fffaf0;}
+  .idade{display:block; font-size:.72rem; color:#666; line-height:1.2; margin-top:2px; white-space:nowrap;}
+  .idade.mau{color:var(--vermelho); font-weight:700;}
+  .idade.alerta{color:#a06a00; font-weight:700;}
+  #painel-val{display:none; border-radius:10px; padding:14px 16px; margin-bottom:18px; font-size:.9rem;}
+  #painel-val.err{background:#fdecec; border:1px solid var(--vermelho); color:#7a0c1d;}
+  #painel-val.warn{background:#fffbe8; border:1px solid #e8d87a; color:#5c4700;}
+  #painel-val h3{font-size:.96rem; margin-bottom:6px;}
+  #painel-val ul{margin:6px 0 0 20px;}
+  #painel-val li{margin:3px 0; cursor:pointer;}
+  #painel-val li:hover{text-decoration:underline;}
+  #painel-val .rodape{margin-top:8px; font-size:.85rem;}
   .up{border:2px dashed var(--borda); border-radius:8px; padding:14px; background:var(--cinza); margin-bottom:12px;}
   .up label{font-size:.92rem;}
   .up input[type=file]{margin-top:6px; font-size:.9rem; width:100%; border:none; background:transparent;}
@@ -93,10 +110,14 @@
     atletas suplentes e acompanhantes; as linhas assinaladas com <span class="req">*</span> são de
     preenchimento obrigatório.
     Após a submissão, <strong>a composição da delegação não poderá ser alterada</strong> — os dados do documento de
-    identificação serão utilizados para a emissão das passagens. É obrigatório anexar <strong>uma fotografia tipo
+    identificação serão utilizados para a emissão das passagens. É obrigatório anexar <strong>o documento de identificação e uma fotografia tipo
     passe</strong> de cada elemento inscrito.
     Clubes com equipas em ambas as competições devem submeter <b>uma inscrição por equipa</b>.
+    Cada equipa pode inscrever, no máximo, <b>3 atletas estrangeiros</b>, dos quais apenas 2 podem constar da folha de jogo,
+    e deve dispor de <b>Seguro Desportivo de Grupo</b> que cubra <b>todos os elementos da delegação</b> (Secção 5).
   </div>
+
+  <div id="painel-val" role="alert" aria-live="polite"></div>
 
   <form id="frm" novalidate>
     <div class="card">
@@ -132,17 +153,18 @@
 
     <div class="card">
       <h2>3. Delegação Oficial <small style="color:#666; font-weight:400;">· obrigatórios: 12 atletas, 2 treinadores e o delegado · restantes linhas facultativas ·
-        anexar o documento de identificação (BI, Passaporte, DIRE, Carta de Condução ou Cédula) e uma
-        fotografia tipo passe de cada elemento — documento: PDF/JPG/PNG, máx. 2 MB · fotografia: JPG/PNG, máx. 2 MB</small></h2>
+        em cada linha preenchida é obrigatório anexar o documento de identificação (BI, Passaporte, DIRE,
+        Carta de Condução ou Cédula) e uma fotografia tipo passe — documento: PDF/JPG/PNG, máx. 2 MB · fotografia: JPG/PNG, máx. 2 MB<br>idade mínima dos atletas: <b>16 anos à data de início da prova</b> · o documento de identificação tem de ser <b>válido até ao último dia da prova</b></small></h2>
       <div class="tbl-wrap">
         <table id="tabela-delegacao">
           <thead>
             <tr>
               <th>N.º</th><th class="col-nome">Apelido e Nome completo</th><th class="col-data">Data de Nasc.</th>
+              <th class="col-nac">Nacionalidade</th>
               <th class="col-tipo">Tipo de documento</th><th class="col-bi">N.º do documento</th>
               <th class="col-data">Validade</th><th class="col-tel">Contacto</th>
               <th class="col-cam">Camisola</th><th class="col-pos">Posição</th>
-              <th class="col-fic">Documento (ficheiro)</th><th class="col-foto">Fotografia tipo passe <span class="req">*</span></th>
+              <th class="col-fic">Documento (ficheiro) <span class="req">*</span></th><th class="col-foto">Fotografia tipo passe <span class="req">*</span></th>
             </tr>
           </thead>
           <tbody id="corpo-delegacao"></tbody>
@@ -153,13 +175,42 @@
     <div class="card">
       <h2>4. Pagamento</h2>
       <p style="font-size:.92rem; margin-bottom:10px;">
-        O pagamento deve ser efectuado por depósito ou transferência para a
-        <b>conta bancária da LMB n.º a indicar pelo Secretariado (a indicar pelo Secretariado)</b>.
+        O pagamento deve ser efectuado por dep&oacute;sito ou transfer&ecirc;ncia banc&aacute;ria para a conta
+        titulada pela <b>Liga Mo&ccedil;ambicana de Basquetebol</b>:<br>
+        <b>Millennium BIM &middot; Conta n.&ordm; 151195453 &middot; Balc&atilde;o da Pra&ccedil;a dos Trabalhadores, Maputo.</b><br>
+        Identifique o Clube no descritivo da opera&ccedil;&atilde;o.
       </p>
       <div class="up">
         <label>Comprovativo de pagamento da taxa de inscrição <span class="req">*</span></label>
         <input type="file" name="comprovativo" accept=".pdf,.jpg,.jpeg,.png" required>
         <small>Formatos: PDF, JPG ou PNG · máx. 5 MB</small>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5. Seguro Desportivo</h2>
+      <p style="font-size:.92rem; margin-bottom:10px;">
+        Nos termos do <b>artigo 53.&ordm; do Regulamento de Provas</b> e do Regulamento do Seguro Desportivo
+        (<b>Decreto n.&ordm; 65/2007, de 24 de Dezembro</b>), cada Clube deve possuir um
+        <b>Seguro Desportivo de Grupo</b> v&aacute;lido que abranja a <b>totalidade dos elementos da delega&ccedil;&atilde;o
+        inscritos</b> &mdash; atletas, equipa t&eacute;cnica, delegado, m&eacute;dico ou massagista, estat&iacute;stico e
+        acompanhantes &mdash; e que se mantenha v&aacute;lido durante todo o per&iacute;odo da prova. A c&oacute;pia da
+        ap&oacute;lice deve ser submetida no campo abaixo <b id="prazo-apolice">at&eacute; ao in&iacute;cio da prova</b>,
+        sob pena de suspens&atilde;o da prova.
+      </p>
+      <div class="up">
+        <label>Ap&oacute;lice do Seguro Desportivo de Grupo <small style="font-weight:400; color:#666;">&middot; submiss&atilde;o online &middot; facultativo nesta fase</small></label>
+        <input type="file" name="apolice" accept=".pdf,.jpg,.jpeg,.png">
+        <small>Formatos: PDF, JPG ou PNG &middot; m&aacute;x. 5 MB &middot; a ap&oacute;lice tem de cobrir <b>todos os elementos
+        da delega&ccedil;&atilde;o</b>. Se ainda n&atilde;o a tiver, pode voltar a este campo ou entreg&aacute;-la ao
+        Secretariado at&eacute; &agrave; data indicada acima.</small>
+      </div>
+      <div class="decl">
+        <input type="checkbox" id="decl-seguro" required>
+        <label for="decl-seguro" style="font-weight:400;">Declaro que o Clube tem conhecimento da obrigatoriedade do
+        Seguro Desportivo de Grupo, que este abranger&aacute; <b>todos os elementos da delega&ccedil;&atilde;o inscritos</b>
+        durante todo o per&iacute;odo da prova, e que entregar&aacute; &agrave; LMB c&oacute;pia da ap&oacute;lice at&eacute;
+        &agrave; data indicada, sob pena de suspens&atilde;o da prova. <span class="req">*</span></label>
       </div>
     </div>
 
@@ -213,6 +264,11 @@ function opcoesTipoDoc(){
   return TIPOS_DOC.map(t => `<option value="${t.v}"${t.v === 'BI' ? ' selected' : ''}>${t.rot}</option>`).join('');
 }
 
+function opcoesNacionalidade(){
+  return '<option value="Mo\u00e7ambicana" selected>Mo\u00e7ambicana</option>' +
+         '<option value="Estrangeira">Estrangeira</option>';
+}
+
 function opcoesCamisola(){
   let o = '<option value="">—</option><option>00</option>';
   for (let i = 0; i <= 99; i++) o += `<option>${i}</option>`;
@@ -228,7 +284,8 @@ function linha(n, papel, req){
   return `<tr data-n="${n}" data-papel="${papel}">
     <td class="num">${n}</td>
     <td class="col-nome"><input type="text" name="m${n}_nome"${r}></td>
-    <td class="col-data"><input type="date" name="m${n}_nasc"${r}></td>
+    <td class="col-data"><input type="date" name="m${n}_nasc" min="1926-01-01"${r}><span class="idade"></span></td>
+    <td class="col-nac"><select class="nac" name="m${n}_nac">${opcoesNacionalidade()}</select></td>
     <td class="col-tipo"><select class="tipo-doc" name="m${n}_tipodoc"${r}>${opcoesTipoDoc()}</select></td>
     <td class="col-bi"><input type="text" name="m${n}_bi" placeholder="N.º do documento"${r}></td>
     <td class="col-data"><input type="date" name="m${n}_bival"${r}></td>
@@ -250,18 +307,18 @@ function linha(n, papel, req){
 const N_MEMBROS = 24;
 
 const corpo = document.getElementById('corpo-delegacao');
-let html = '<tr class="sec"><td colspan="11">ATLETAS (1–12) — as 12 linhas são obrigatórias</td></tr>';
+let html = '<tr class="sec"><td colspan="12">ATLETAS (1–12) — as 12 linhas são obrigatórias</td></tr>';
 for (let n = 1; n <= 12; n++) html += linha(n, 'Atleta', true);
-html += '<tr class="sec"><td colspan="11">ATLETAS SUPLENTES (13–15) — preencher apenas os necessários</td></tr>';
+html += '<tr class="sec"><td colspan="12">ATLETAS SUPLENTES (13–15) — preencher apenas os necessários</td></tr>';
 for (let n = 13; n <= 15; n++) html += linha(n, 'Atleta Suplente', false);
-html += '<tr class="sec"><td colspan="11">EQUIPA TÉCNICA (16–17) — 16 Treinador Principal · 17 Treinador Adjunto · ambos obrigatórios</td></tr>';
+html += '<tr class="sec"><td colspan="12">EQUIPA TÉCNICA (16–17) — 16 Treinador Principal · 17 Treinador Adjunto · ambos obrigatórios</td></tr>';
 html += linha(16, 'Treinador Principal', true);
 html += linha(17, 'Treinador Adjunto', true);
-html += '<tr class="sec"><td colspan="11">APOIO (18–20) — 18 Delegado (obrigatório) · 19 Médico/Massagista · 20 Estatístico</td></tr>';
+html += '<tr class="sec"><td colspan="12">APOIO (18–20) — 18 Delegado (obrigatório) · 19 Médico/Massagista · 20 Estatístico</td></tr>';
 html += linha(18, 'Delegado', true);
 html += linha(19, 'Médico / Massagista', false);
 html += linha(20, 'Estatístico', false);
-html += '<tr class="sec"><td colspan="11">ACOMPANHANTES (21–24) — preencher apenas os necessários</td></tr>';
+html += '<tr class="sec"><td colspan="12">ACOMPANHANTES (21–24) — preencher apenas os necessários</td></tr>';
 for (let n = 21; n <= 24; n++) html += linha(n, 'Acompanhante', false);
 corpo.innerHTML = html;
 
@@ -273,8 +330,13 @@ function aplicarTipoDoc(sel){
   if (!val) return;
   if (t && t.validade === false){
     val.value = ''; val.disabled = true; val.required = false; val.placeholder = 'n/a';
+    val.classList.remove('mal', 'duvida');
   } else {
     val.disabled = false;
+    val.placeholder = '';
+    /* repoe a obrigatoriedade nas linhas obrigatorias (o nome e' required nessas linhas) */
+    const nome = tr.querySelector('input[name$="_nome"]');
+    val.required = !!(nome && nome.required);
   }
 }
 corpo.addEventListener('change', ev => {
@@ -290,7 +352,7 @@ corpo.addEventListener('change', ev => {
   const url = URL.createObjectURL(fx);
   img.src = url; img.classList.add('ok');
   img.onload = () => URL.revokeObjectURL(url);
-  ev.target.closest('tr').classList.remove('falta');
+  ev.target.closest('tr').classList.remove('falta', 'erro');
 });
 
 /* --- Uma linha considera-se preenchida se tiver nome --- */
@@ -299,12 +361,307 @@ function linhaPreenchida(tr){
   return !!(nome && nome.value.trim());
 }
 
-const taxas = {'Liga Feminina': '75.000,00 MT (setenta e cinco mil meticais)',
-               'Liga Masculina': '100.000,00 MT (cem mil meticais)'};
+/* ================================================================
+   REGRAS DE IDADE E DE DATAS  (Secretariado: alterar aqui)
+   ================================================================
+   COMPETICOES ......... datas oficiais de cada prova (Comunicado
+                         Oficial 13/LMB/DG/2026 e Cartas 67-69).
+   IDADE_MINIMA_ATLETA . idade minima dos atletas, aferida a` DATA DE
+                         INICIO da prova escolhida na Seccao 1.
+   O documento de identificacao tem de estar valido ate' ao ULTIMO
+   DIA da prova. Datas impossiveis e documentos caducados BLOQUEIAM a
+   submissao; casos limite geram apenas um AVISO que o clube confirma.
+   ================================================================ */
+const COMPETICOES = {
+  'Liga Feminina':  {inicio: '2026-08-28', fim: '2026-09-15',
+                     apolice: '2026-08-25',
+                     taxa: '75.000,00 MT (setenta e cinco mil meticais)'},
+  'Liga Masculina': {inicio: '2026-09-06', fim: '2026-09-24',
+                     apolice: '2026-09-03',
+                     taxa: '100.000,00 MT (cem mil meticais)'},
+};
+
+/* Numero maximo de atletas estrangeiros INSCRITOS por equipa
+   (Carta 67-69, Seccao 1; apenas 2 podem constar da folha de jogo). */
+const MAX_ATLETAS_ESTRANGEIROS = 3;
+
+const IDADE_MINIMA_ATLETA   = 16;   // bloqueia
+const IDADE_MINIMA_PLAUS    = 10;   // bloqueia (data manifestamente errada)
+const IDADE_MAXIMA_PLAUS    = 90;   // bloqueia (data manifestamente errada)
+const IDADE_AVISO_ATLETA    = 45;   // avisa: atleta invulgarmente veterano
+const IDADE_AVISO_OFICIAL   = 18;   // avisa: dirigente/tecnico menor de idade
+const MARGEM_VALIDADE_DIAS  = 60;   // avisa: documento caduca pouco depois da prova
+
+/* ---------- utilitarios de data (strings ISO aaaa-mm-dd) ---------- */
+function hojeISO(){
+  const n = new Date();
+  return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') +
+         '-' + String(n.getDate()).padStart(2, '0');
+}
+function dataValida(iso){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) return false;
+  const [a, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(a, m - 1, d));
+  return dt.getUTCFullYear() === a && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+}
+function fmtPT(iso){
+  if (!dataValida(iso)) return iso || '—';
+  const [a, m, d] = iso.split('-');
+  return d + '/' + m + '/' + a;
+}
+function idadeEm(nasc, ref){
+  const [an, mn, dn] = nasc.split('-').map(Number);
+  const [ar, mr, dr] = ref.split('-').map(Number);
+  let i = ar - an;
+  if (mr < mn || (mr === mn && dr < dn)) i--;
+  return i;
+}
+function maisDias(iso, n){
+  const [a, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(a, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + n);
+  return dt.toISOString().slice(0, 10);
+}
+function ehAtleta(tr){ return tr.dataset.papel.indexOf('Atleta') === 0; }
+function competicaoSel(){
+  const r = document.querySelector('input[name=competicao]:checked');
+  if (!r || !COMPETICOES[r.value]) return null;
+  return Object.assign({nome: r.value}, COMPETICOES[r.value]);
+}
+
+/* ---------- taxa + limites das datas em funcao da competicao ---------- */
 document.querySelectorAll('input[name=competicao]').forEach(r =>
   r.addEventListener('change', () => {
-    document.getElementById('taxa-valor').textContent = taxas[r.value];
+    document.getElementById('taxa-valor').textContent = COMPETICOES[r.value].taxa;
+    actualizarPrazoApolice();
+    aplicarLimitesDatas();
+    document.querySelectorAll('#corpo-delegacao tr[data-n]').forEach(actualizarIdade);
+    limparPainel();
   }));
+
+function aplicarLimitesDatas(){
+  const c = competicaoSel();
+  const hoje = hojeISO();
+  document.querySelectorAll('#corpo-delegacao tr[data-n]').forEach(tr => {
+    const nasc = tr.querySelector('input[name$="_nasc"]');
+    const val  = tr.querySelector('input[name$="_bival"]');
+    if (nasc) nasc.max = hoje;                       // nunca no futuro
+    if (val)  val.title = c
+      ? 'O documento tem de estar valido pelo menos ate’ ' + fmtPT(c.fim) +
+        ' (ultimo dia da ' + c.nome + ').'
+      : 'Seleccione primeiro a competicao na Seccao 1.';
+  });
+}
+
+let avisosAceites = '';   // assinatura dos avisos ja' confirmados pelo clube
+
+/* ---------- idade calculada, mostrada por baixo da data ---------- */
+function actualizarIdade(tr){
+  const sp = tr.querySelector('.idade');
+  const nascI = tr.querySelector('input[name$="_nasc"]');
+  if (!sp || !nascI) return;
+  sp.className = 'idade';
+  const nasc = nascI.value;
+  if (!dataValida(nasc)){ sp.textContent = ''; return; }
+  const c = competicaoSel();
+  const ref = c ? c.inicio : hojeISO();
+  const idade = idadeEm(nasc, ref);
+  sp.textContent = idade + ' anos ' + (c ? '(no início da prova)' : '(hoje)');
+  const atleta = ehAtleta(tr);
+  if (nasc > hojeISO() || idade < IDADE_MINIMA_PLAUS || idade > IDADE_MAXIMA_PLAUS ||
+      (atleta && idade < IDADE_MINIMA_ATLETA)){
+    sp.classList.add('mau');
+  } else if ((atleta && idade >= IDADE_AVISO_ATLETA) || (!atleta && idade < IDADE_AVISO_OFICIAL)){
+    sp.classList.add('alerta');
+  }
+}
+
+corpo.addEventListener('input', ev => {
+  if (ev.target.name && ev.target.name.endsWith('_nasc')) actualizarIdade(ev.target.closest('tr'));
+});
+corpo.addEventListener('change', ev => {
+  const n = ev.target.name || '';
+  if (ev.target.classList.contains('nac')){
+    ev.target.classList.toggle('estrangeiro', ev.target.value === 'Estrangeira');
+    avisosAceites = '';
+  }
+  if (n.endsWith('_nasc') || n.endsWith('_bival') || ev.target.classList.contains('tipo-doc')){
+    ev.target.classList.remove('mal', 'duvida');
+    avisosAceites = '';
+  }
+});
+
+/* ================= VERIFICACOES DE IDADE E DATAS ================= */
+function validarIdadesEDatas(){
+  const erros = [], avisos = [];
+  const hoje = hojeISO();
+
+  document.querySelectorAll('#corpo-delegacao tr[data-n]').forEach(tr => {
+    tr.classList.remove('erro', 'suspeita');
+    tr.querySelectorAll('input.mal, input.duvida').forEach(i => i.classList.remove('mal', 'duvida'));
+  });
+
+  const c = competicaoSel();
+  if (!c){
+    erros.push({msg: 'Seleccione a competição na Secção 1 — as verificações de idade e de validade dos ' +
+                     'documentos dependem das datas da prova.',
+                el: document.querySelector('input[name=competicao]')});
+    return {erros, avisos};
+  }
+
+  for (const tr of document.querySelectorAll('#corpo-delegacao tr[data-n]')){
+    if (!linhaPreenchida(tr)) continue;
+    const et     = 'N.º ' + tr.dataset.n + ' (' + tr.dataset.papel + ')';
+    const atleta = ehAtleta(tr);
+    const nascI  = tr.querySelector('input[name$="_nasc"]');
+    const valI   = tr.querySelector('input[name$="_bival"]');
+    const tipoS  = tr.querySelector('select.tipo-doc');
+    const nasc   = nascI.value, val = valI.value;
+    /* --- data de nascimento --- */
+    if (!nasc){
+      erros.push({msg: et + ': falta a data de nascimento.', tr: tr, el: nascI});
+    } else if (!dataValida(nasc)){
+      erros.push({msg: et + ': a data de nascimento não é uma data válida.', tr: tr, el: nascI});
+    } else if (nasc > hoje){
+      erros.push({msg: et + ': a data de nascimento (' + fmtPT(nasc) + ') está no futuro.', tr: tr, el: nascI});
+    } else {
+      const idade = idadeEm(nasc, c.inicio);
+      if (idade < IDADE_MINIMA_PLAUS || idade > IDADE_MAXIMA_PLAUS){
+        erros.push({msg: et + ': a data de nascimento (' + fmtPT(nasc) + ') corresponde a ' + idade +
+                         ' anos no início da prova — verifique se está correcta.', tr: tr, el: nascI});
+      } else if (atleta && idade < IDADE_MINIMA_ATLETA){
+        erros.push({msg: et + ': o atleta tem ' + idade + ' anos a ' + fmtPT(c.inicio) + ' (início da ' +
+                         c.nome + '). A idade mínima é de ' + IDADE_MINIMA_ATLETA + ' anos.', tr: tr, el: nascI});
+      } else if (atleta && idade >= IDADE_AVISO_ATLETA){
+        avisos.push({msg: et + ': atleta com ' + idade + ' anos no início da prova — confirme a data de nascimento.',
+                     tr: tr, el: nascI});
+      } else if (!atleta && idade < IDADE_AVISO_OFICIAL){
+        avisos.push({msg: et + ': elemento da equipa técnica/apoio com ' + idade + ' anos — confirme a data de nascimento.',
+                     tr: tr, el: nascI});
+      }
+    }
+
+    /* --- validade do documento de identificação --- */
+    const tipo = tipoS ? tipoS.value : '';
+    const def  = TIPOS_DOC.find(x => x.v === tipo);
+    const exigeValidade = !(def && def.validade === false);
+    if (exigeValidade){
+      if (!val){
+        erros.push({msg: et + ': falta a data de validade do documento (' + (tipo || 'documento') + ').',
+                    tr: tr, el: valI});
+      } else if (!dataValida(val)){
+        erros.push({msg: et + ': a validade do documento não é uma data válida.', tr: tr, el: valI});
+      } else if (dataValida(nasc) && val <= nasc){
+        erros.push({msg: et + ': a validade do documento (' + fmtPT(val) + ') é anterior ou igual à data de nascimento (' +
+                         fmtPT(nasc) + ').', tr: tr, el: valI});
+      } else if (val < hoje){
+        erros.push({msg: et + ': o documento caducou a ' + fmtPT(val) + '.', tr: tr, el: valI});
+      } else if (val < c.fim){
+        erros.push({msg: et + ': o documento caduca a ' + fmtPT(val) + ', antes do fim da ' + c.nome + ' (' +
+                         fmtPT(c.fim) + '). Tem de ser válido até ao último dia da prova.', tr: tr, el: valI});
+      } else if (val < maisDias(c.fim, MARGEM_VALIDADE_DIAS)){
+        avisos.push({msg: et + ': o documento caduca a ' + fmtPT(val) + ', menos de ' + MARGEM_VALIDADE_DIAS +
+                          ' dias após o fim da prova — pondere renová-lo antes da viagem.', tr: tr, el: valI});
+      }
+    }
+  }
+  return {erros, avisos};
+}
+
+/* ================= ANEXOS OBRIGATORIOS =================
+   Em qualquer linha preenchida (incluindo as facultativas) sao
+   exigidos o ficheiro do documento de identificacao E a fotografia
+   tipo passe. */
+function validarAnexos(){
+  const erros = [];
+  for (const tr of document.querySelectorAll('#corpo-delegacao tr[data-n]')){
+    if (!linhaPreenchida(tr)) continue;
+    const et   = 'N.º ' + tr.dataset.n + ' (' + tr.dataset.papel + ')';
+    const doc  = tr.querySelector('input[name$="_bifile"]');
+    const foto = tr.querySelector('input.foto');
+    if (doc && !doc.files[0])
+      erros.push({msg: et + ': falta o ficheiro do documento de identificação (PDF, JPG ou PNG, máx. 2 MB).',
+                  tr: tr, el: doc});
+    if (foto && !foto.files[0])
+      erros.push({msg: et + ': falta a fotografia tipo passe (JPG ou PNG, máx. 2 MB).',
+                  tr: tr, el: foto});
+  }
+  return erros;
+}
+
+/* ================= SEGURO DESPORTIVO =================
+   Artigo 53.o do Regulamento de Provas (2009) e Regulamento do Seguro
+   Desportivo (Decreto n.o 65/2007, de 24 de Dezembro): o clube tem de
+   possuir Seguro Desportivo de Grupo e entregar copia da apolice ate'
+   a` data fixada para cada prova (constante «apolice» em COMPETICOES),
+   sob pena de suspensao. O anexo e' facultativo nesta fase; a
+   declaracao de compromisso e' obrigatoria. */
+function actualizarPrazoApolice(){
+  const el = document.getElementById('prazo-apolice');
+  if (!el) return;
+  const c = competicaoSel();
+  el.textContent = c ? ('at\u00e9 ' + fmtPT(c.apolice)) : 'at\u00e9 ao in\u00edcio da prova';
+}
+
+/* ================= ATLETAS ESTRANGEIROS =================
+   Bloqueia a submissao com mais de MAX_ATLETAS_ESTRANGEIROS atletas
+   estrangeiros inscritos (linhas 1-15). Nao se aplica a` equipa
+   tecnica nem aos acompanhantes. */
+function validarEstrangeiros(){
+  const erros = [], linhas = [];
+  for (const tr of document.querySelectorAll('#corpo-delegacao tr[data-n]')){
+    const sel = tr.querySelector('select.nac');
+    if (sel) sel.classList.toggle('estrangeiro', sel.value === 'Estrangeira');
+    if (!linhaPreenchida(tr) || !ehAtleta(tr)) continue;
+    if (sel && sel.value === 'Estrangeira') linhas.push(tr);
+  }
+  if (linhas.length > MAX_ATLETAS_ESTRANGEIROS){
+    const ns = linhas.map(tr => tr.dataset.n).join(', ');
+    linhas.forEach(tr => erros.push({
+      msg: 'N.\u00ba ' + tr.dataset.n + ' (' + tr.dataset.papel + '): a equipa tem ' + linhas.length +
+           ' atletas estrangeiros inscritos (linhas ' + ns + '). O m\u00e1ximo \u00e9 de ' +
+           MAX_ATLETAS_ESTRANGEIROS + ', dos quais apenas 2 podem constar da folha de jogo.',
+      tr: tr, el: tr.querySelector('select.nac')}));
+  }
+  return erros;
+}
+
+/* ---------- painel de resultados ---------- */
+const painel = document.getElementById('painel-val');
+
+function limparPainel(){
+  painel.style.display = 'none';
+  painel.className = '';
+  painel.innerHTML = '';
+}
+
+function mostrarPainel(tipo, itens){
+  const erro = tipo === 'err';
+  painel.className = tipo;
+  const titulo = erro
+    ? (itens.length === 1 ? 'Foi encontrado 1 problema nas datas — corrija antes de submeter'
+                          : 'Foram encontrados ' + itens.length + ' problemas nas datas — corrija antes de submeter')
+    : (itens.length === 1 ? 'Há 1 situação a confirmar' : 'Há ' + itens.length + ' situações a confirmar');
+  const rodape = erro
+    ? 'Clique numa das linhas acima para saltar directamente para o campo.'
+    : 'Se os dados estiverem correctos, volte a carregar em <b>Confirmar e submeter</b> para prosseguir.';
+  painel.innerHTML = '<h3>' + titulo + '</h3><ul>' +
+    itens.map((it, i) => '<li data-i="' + i + '">' + it.msg + '</li>').join('') +
+    '</ul><div class="rodape">' + rodape + '</div>';
+  painel.querySelectorAll('li').forEach(li => li.addEventListener('click', () => {
+    const it = itens[+li.dataset.i];
+    if (it.el){ it.el.scrollIntoView({block: 'center', behavior: 'smooth'}); it.el.focus(); }
+  }));
+  itens.forEach(it => {
+    if (it.tr) it.tr.classList.add(erro ? 'erro' : 'suspeita');
+    if (it.el && it.el.tagName === 'INPUT' && it.el.type === 'date') it.el.classList.add(erro ? 'mal' : 'duvida');
+  });
+  painel.style.display = 'block';
+  painel.scrollIntoView({block: 'center', behavior: 'smooth'});
+}
+
+aplicarLimitesDatas();
+actualizarPrazoApolice();
 
 if (!FORM_ENDPOINT) document.getElementById('config-banner').style.display = 'block';
 
@@ -328,25 +685,33 @@ document.getElementById('frm').addEventListener('submit', async ev => {
           'O Secretariado da LMB deve configurar o endpoint (ver instruções) e voltar a divulgar o link.');
     return;
   }
-  // fotografia tipo passe obrigatória em todas as linhas preenchidas
+  // verificações de idade, de datas e de anexos obrigatórios
+  limparPainel();
   document.querySelectorAll('#corpo-delegacao tr[data-n]').forEach(tr => tr.classList.remove('falta'));
-  for (const tr of document.querySelectorAll('#corpo-delegacao tr[data-n]')){
-    if (!linhaPreenchida(tr)) continue;
-    const foto = tr.querySelector('input.foto');
-    if (!foto.files[0]){
-      tr.classList.add('falta');
-      alert('Falta a fotografia tipo passe do elemento n.º ' + tr.dataset.n +
-            ' (' + tr.dataset.papel + ').\nA fotografia é obrigatória para todos os inscritos.');
-      foto.scrollIntoView({block: 'center', behavior: 'smooth'});
-      foto.focus();
-      return;
-    }
+  const btnV = document.getElementById('btn');
+  const {erros: errosDatas, avisos} = validarIdadesEDatas();
+  const erros = errosDatas.concat(validarEstrangeiros()).concat(validarAnexos())
+    .sort((a, b) => ((a.tr ? +a.tr.dataset.n : 0) - (b.tr ? +b.tr.dataset.n : 0)));
+  if (erros.length){
+    mostrarPainel('err', erros);
+    btnV.textContent = 'Submeter Inscrição';
+    avisosAceites = '';
+    return;
   }
+  const assinatura = avisos.map(a => a.msg).join('|');
+  if (avisos.length && avisosAceites !== assinatura){
+    avisosAceites = assinatura;
+    mostrarPainel('warn', avisos);
+    btnV.textContent = 'Confirmar e submeter';
+    return;
+  }
+
   // validar tamanhos dos ficheiros
   for (const inp of f.querySelectorAll('input[type=file]')){
     const fx = inp.files[0];
     if (!fx) continue;
-    const lim = inp.name === 'comprovativo' ? MAX_COMP : (inp.classList.contains('foto') ? MAX_FOTO : MAX_BI);
+    const lim = (inp.name === 'comprovativo' || inp.name === 'apolice')
+              ? MAX_COMP : (inp.classList.contains('foto') ? MAX_FOTO : MAX_BI);
     if (fx.size > lim){
       alert(`O ficheiro «${fx.name}» excede o limite de ${lim / 1024 / 1024} MB.`);
       inp.focus();
@@ -377,6 +742,7 @@ document.getElementById('frm').addEventListener('submit', async ev => {
     if (!resp.ok || out.ok === false) throw new Error(out.erro || ('HTTP ' + resp.status));
     f.style.display = 'none';
     document.querySelector('.aviso').style.display = 'none';
+    limparPainel();
     document.getElementById('sucesso').style.display = 'block';
     window.scrollTo({top: 0, behavior: 'smooth'});
   }catch(e){
